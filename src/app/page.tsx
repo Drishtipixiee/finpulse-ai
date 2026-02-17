@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
 export default function Home() {
-  // This instantly sends the user to the Intelligence Hub
+  // This forces the official link to open your Intelligent Hub
   redirect('/dashboard');
 }

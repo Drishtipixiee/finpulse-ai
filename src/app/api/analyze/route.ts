@@ -1,32 +1,56 @@
 import { NextResponse } from 'next/server';
 
+// Interface to prevent TypeScript errors
+interface Action {
+  type: string;
+  message: string;
+  product: string | null;
+}
+
+const DTI_LIMIT = 0.45; // Banking safety threshold
+
 export async function POST(req: Request) {
   try {
-    const { amount, description } = await req.json();
+    const { amount, description, monthlyIncome = 80000 } = await req.json();
 
-    // 1. Pulse Engine: Logic to detect Life-Events
+    // 1. PULSE ENGINE: Pattern Recognition
     const isEducation = description.toLowerCase().includes('university');
-    
-    // 2. Persona Check: Simulated Vector DB logic
-    const userPersona = "Second Year Student"; 
 
-    // 3. Guardrail: Compliance & DTI Safety Check
-    const dtiRatio = 0.35; // Simulated data
-    const isSafe = dtiRatio < 0.45; 
+    // 2. GUARDRAIL ENGINE: Risk Assessment
+    const dtiRatio = amount / monthlyIncome;
+    const isSafe = dtiRatio < DTI_LIMIT;
 
-    // 4. Context Engine: Personalized Advice
-    const recommendation = isEducation && isSafe 
-      ? "Preparing for studies? Get 0% Forex on our Student Travel Card instead of a standard loan."
-      : "Standard transaction recorded. Focus on your monthly savings goal.";
+    // 3. CONTEXT ENGINE: Intelligent Decisioning
+    let action: Action = {
+      type: "NEUTRAL",
+      message: "Transaction analyzed successfully.",
+      product: null
+    };
+
+    if (isEducation) {
+      if (isSafe) {
+        action = {
+          type: "PROACTIVE_OFFER",
+          message: "University fee detected. We recommend our 0% Forex Student Card for your international studies.",
+          product: "Student Forex Card"
+        };
+      } else {
+        action = {
+          type: "SAFETY_ADVICE",
+          message: "Education payment detected. To maintain financial health, we suggest a Smart Savings SIP.",
+          product: "Education SIP Plan"
+        };
+      }
+    }
 
     return NextResponse.json({
-      status: "success",
-      analysis: isEducation ? "Higher Ed Life-Event" : "Standard Transaction",
-      recommendation: recommendation,
-      persona: userPersona,
-      guardrailPassed: isSafe
+      success: true,
+      pulse: isEducation ? "Education Event" : "Standard",
+      guardrail: { status: isSafe ? "PASS" : "ALERT", ratio: dtiRatio },
+      action
     });
-  } catch (error) {
-    return NextResponse.json({ status: "error", message: "Failed to analyze" }, { status: 500 });
+ } catch {
+    // Simply remove the (_error) entirely if you aren't using it
+    return NextResponse.json({ success: false, error: "System Latency" }, { status: 500 });
   }
 }

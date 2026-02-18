@@ -1,4 +1,7 @@
 import pandas as pd
+import os
+from dotenv import load_dotenv
+load_dotenv()
 from groq import Groq
 
 # ── Config ────────────────────────────────────────────────
@@ -29,7 +32,7 @@ CATEGORY_MAP = {
     "Transfer":             "Transfer"
 }
 
-GROQ_API_KEY = "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"  
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # ── Function 1: Load Data ─────────────────────────────────
 def load_user_transactions(user_id: str):

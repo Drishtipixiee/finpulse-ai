@@ -32,7 +32,11 @@ CATEGORY_MAP = {
     "Transfer":             "Transfer"
 }
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+# Set the API key variable globally so all functions can see it
+GROQ_KEY = os.getenv("GROQ_API_KEY")
+
+# Initialize the Groq client globally
+client = Groq(api_key=GROQ_KEY)
 
 # ── Function 1: Load Data ─────────────────────────────────
 def load_user_transactions(user_id: str):

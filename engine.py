@@ -1,11 +1,13 @@
 import pandas as pd
 import os
 from dotenv import load_dotenv
-load_dotenv()
 from groq import Groq
 
+# Load environment variables from .env file
+load_dotenv()
+
 # ── Config ────────────────────────────────────────────────
-USE_DATABASE = False  # flip to True tomorrow if adding PostgreSQL
+USE_DATABASE = False  # flip to True if adding PostgreSQL later
 
 ACCOUNT_TO_USER = {
     "Platinum Card": "user_001",
@@ -32,43 +34,46 @@ CATEGORY_MAP = {
     "Transfer":             "Transfer"
 }
 
-# Set the API key variable globally so all functions can see it
+# Set the API key variable globally from the environment
 GROQ_KEY = os.getenv("GROQ_API_KEY")
 
-# Initialize the Groq client globally
+# Initialize the Groq client globally using that key
 client = Groq(api_key=GROQ_KEY)
 
 # ── Function 1: Load Data ─────────────────────────────────
 def load_user_transactions(user_id: str):
-    df = pd.read_csv("data/transactions.csv")
+    try:
+        df = pd.read_csv("data/transactions.csv")
 
-    df["user_id"]  = df["Account Name"].map(ACCOUNT_TO_USER)
-    df["category"] = df["Category"].map(CATEGORY_MAP).fillna("Other")
-    df = df.rename(columns={
-        "Date":             "date",
-        "Amount":           "amount",
-        "Transaction Type": "type",
-        "Description":      "description"
-    })
+        df["user_id"]  = df["Account Name"].map(ACCOUNT_TO_USER)
+        df["category"] = df["Category"].map(CATEGORY_MAP).fillna("Other")
+        df = df.rename(columns={
+            "Date":             "date",
+            "Amount":           "amount",
+            "Transaction Type": "type",
+            "Description":      "description"
+        })
 
-    user_df = df[df["user_id"] == user_id]
+        user_df = df[df["user_id"] == user_id]
 
-    if user_df.empty:
+        if user_df.empty:
+            return []
+
+        return user_df[["user_id", "date", "amount", "category", "type", "description"]].to_dict(orient="records")
+    except FileNotFoundError:
+        print("Error: data/transactions.csv not found.")
         return []
-
-    return user_df[["user_id", "date", "amount", "category", "type", "description"]].to_dict(orient="records")
 
 # ── Function 2: Behaviour Detection ──────────────────────
 def detect_behaviour(transactions):
-    food        = sum(1 for t in transactions if t["category"] == "Food")
-    travel      = sum(1 for t in transactions if t["category"] == "Travel")
-    salary      = sum(1 for t in transactions if t["category"] == "Salary")
-    education   = sum(1 for t in transactions if t["category"] == "Education")
-    rent        = sum(1 for t in transactions if t["category"] == "Rent")
-    shopping    = sum(1 for t in transactions if t["category"] == "Shopping")
+    food          = sum(1 for t in transactions if t["category"] == "Food")
+    travel        = sum(1 for t in transactions if t["category"] == "Travel")
+    salary        = sum(1 for t in transactions if t["category"] == "Salary")
+    education     = sum(1 for t in transactions if t["category"] == "Education")
+    rent          = sum(1 for t in transactions if t["category"] == "Rent")
+    shopping      = sum(1 for t in transactions if t["category"] == "Shopping")
     entertainment = sum(1 for t in transactions if t["category"] == "Entertainment")
 
-    amounts  = [t["amount"] for t in transactions]
     credits  = [t["amount"] for t in transactions if t["type"] == "credit"]
     debits   = [t["amount"] for t in transactions if t["type"] == "debit"]
 
@@ -109,9 +114,7 @@ def detect_persona(behaviour, life_event):
         return "student"
     if behaviour["low_balance"] and behaviour["salary_detected"]:
         return "credit_dependent"
-    if behaviour["food_spending"] == "high" or behaviour["is_traveler"]:
-        return "spender"
-    if behaviour["shopping_count"] > 5:
+    if behaviour["food_spending"] == "high" or behaviour["is_traveler"] or behaviour["shopping_count"] > 5:
         return "spender"
     if not behaviour["low_balance"] and behaviour["salary_detected"]:
         return "saver"
@@ -133,15 +136,15 @@ def recommend_product(persona, life_event):
 # ── Function 6: Confidence Score ─────────────────────────
 def calculate_confidence(behaviour, persona, life_event):
     score = 0
-    if behaviour["salary_detected"]:        score += 30
-    if behaviour["food_count"] > 10:        score += 40
-    elif behaviour["food_count"] > 5:       score += 20
-    if behaviour["is_traveler"]:            score += 20
-    if behaviour["education_count"] >= 2:   score += 30
-    if behaviour["rent_count"] >= 2:        score += 20
-    if behaviour["shopping_count"] > 5:     score += 15
-    if life_event != "unknown":             score += 20
-    if persona != "general":               score += 10
+    if behaviour["salary_detected"]:         score += 30
+    if behaviour["food_count"] > 10:         score += 40
+    elif behaviour["food_count"] > 5:        score += 20
+    if behaviour["is_traveler"]:             score += 20
+    if behaviour["education_count"] >= 2:    score += 30
+    if behaviour["rent_count"] >= 2:         score += 20
+    if behaviour["shopping_count"] > 5:      score += 15
+    if life_event != "unknown":              score += 20
+    if persona != "general":                score += 10
     return min(score, 100)
 
 # ── Function 7: Guardrail Safety Check ───────────────────
@@ -192,10 +195,9 @@ def generate_reason(behaviour, persona, life_event):
     reason = ", ".join(parts) if parts else "general spending pattern observed"
     return f"User identified as {persona} due to: {reason}."
 
-# ── Function 9: LLM Personalised Message ─────────────────
+# ── Function 9: LLM Personalised Message (FIXED) ─────────
 def generate_llm_message(persona, product, reason):
     try:
-        client = Groq(api_key=GROQ_API_KEY)
         prompt = f"""
         You are a warm friendly bank assistant.
         Customer type: {persona}
@@ -204,6 +206,7 @@ def generate_llm_message(persona, product, reason):
         Write a short 2 line personalised message recommending 
         this product. Be friendly and specific, not robotic.
         """
+        # Using the global 'client' which was initialized with the GROQ_KEY
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}]
@@ -247,4 +250,4 @@ if __name__ == "__main__":
         print(f"\n{'='*50}")
         result = analyze_user(user)
         for key, value in result.items():
-            print(f"{key}: {value}")            
+            print(f"{key}: {value}")

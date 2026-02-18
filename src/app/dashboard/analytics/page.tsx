@@ -1,54 +1,89 @@
 'use client';
-import { useState } from 'react';
-import { Sparkles, ShieldCheck, Zap, BrainCircuit } from 'lucide-react';
-import AILogger from '@/components/guardrails/AILogger';
+import { useEffect, useState } from 'react';
+import { ShieldAlert, ShieldCheck, Users, Brain, Target, AlertTriangle, CheckCircle } from 'lucide-react';
 
-export default function UniversalDashboard() {
-  const [description, setDescription] = useState('');
-  const [logs, setLogs] = useState<string[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+const FASTAPI_URL = 'http://localhost:8000';
+const PERSONA_COLORS: Record<string, string> = {
+  student: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
+  spender: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
+  saver: 'text-green-400 bg-green-400/10 border-green-400/30',
+  credit_dependent: 'text-red-400 bg-red-400/10 border-red-400/30',
+  general: 'text-slate-400 bg-slate-400/10 border-slate-400/30',
+};
+
+export default function AnalyticsPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>({ confidence: 0, users: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) { setError('Please log in.'); setLoading(false); return; }
+      try {
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const [uRes, cRes, gRes] = await Promise.all([
+          fetch(`${FASTAPI_URL}/admin/all-users`, { headers }).then(r => r.json()),
+          fetch(`${FASTAPI_URL}/admin/confidence-analytics`, { headers }).then(r => r.json()),
+          fetch(`${FASTAPI_URL}/admin/guardrail-blocks`, { headers }).then(r => r.json()),
+        ]);
+        setUsers(uRes.users || []);
+        setStats({ confidence: cRes.average_confidence, users: gRes.total_users });
+      } catch (err) { setError('Sync Error'); }
+      finally { setLoading(false); }
+    };
+    fetchData();
+  }, []);
+
+  // Filter to show only ONE unique identity card
+  const groupedUsers = (users || []).reduce((acc: any[], current: any) => {
+    if (!acc.find(item => item.user_id === current.user_id)) acc.push(current);
+    return acc;
+  }, []);
+
+  if (loading) return <div className="p-8 text-white">Loading Admin Data...</div>;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-10 animate-in fade-in duration-1000">
-      {/* AI Status Header */}
-      <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-500/20 rounded-full animate-pulse">
-            <BrainCircuit className="text-blue-400" size={24} />
-          </div>
-          <div>
-            <h1 className="text-sm font-black text-white uppercase tracking-widest">FinPulse Agentic AI</h1>
-            <p className="text-[10px] text-blue-400 font-mono">Status: Observing Global Markets & User Patterns</p>
-          </div>
+    <div className="p-8 space-y-8 animate-in fade-in">
+      <header className="border-b border-slate-800 pb-6">
+        <h1 className="text-4xl font-black text-white italic underline decoration-blue-500">Risk Analytics</h1>
+      </header>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-[#0d1425] p-6 rounded-2xl border border-slate-800">
+          <p className="text-xs text-slate-500 uppercase font-bold">Total Sessions</p>
+          <p className="text-4xl font-black text-white">{stats.users}</p>
+        </div>
+        <div className="bg-[#0d1425] p-6 rounded-2xl border border-slate-800">
+          <p className="text-xs text-slate-500 uppercase font-bold">Unique Identities</p>
+          <p className="text-4xl font-black text-white">{groupedUsers.length}</p>
+        </div>
+        <div className="bg-[#0d1425] p-6 rounded-2xl border border-slate-800">
+          <p className="text-xs text-slate-500 uppercase font-bold">Avg Confidence</p>
+          <p className="text-4xl font-black text-white">{stats.confidence}%</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Input Section */}
-        <div className="space-y-6">
-          <h2 className="text-2xl font-light text-white">What happened in your <span className="text-blue-500 font-bold italic">Financial Life</span> today?</h2>
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-            <textarea 
-              className="relative w-full bg-[#050914] border border-white/10 rounded-2xl p-6 text-white text-lg focus:outline-none focus:border-blue-500 transition-all h-32"
-              placeholder="e.g. Just paid my apartment rental deposit in Bangalore..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 py-4 rounded-xl font-bold text-white shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3">
-            <Sparkles size={20} /> Let AI Analyze Patterns
-          </button>
-        </div>
-
-        {/* AI Reasoning Log (The "Human" Touch) */}
-        <div className="bg-[#0d1425] border border-slate-800 rounded-3xl p-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Zap size={100} className="text-blue-500" />
-          </div>
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Agentic Reasoning Core</h3>
-          <AILogger logs={logs} />
-        </div>
+      <div className="space-y-4">
+        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Customer Profiles</h3>
+        {groupedUsers.length === 0 ? (
+          <div className="p-20 border border-dashed border-slate-800 rounded-3xl text-center text-slate-600">No data found. Analyze a transaction first.</div>
+        ) : (
+          groupedUsers.map((user, idx) => (
+            <div key={`${user.user_id}-${idx}`} className="bg-[#0d1425] border border-slate-800 rounded-2xl p-5 space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="flex gap-3 items-center">
+                  <span className="text-xs font-black text-white">{user.user_id}</span>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${PERSONA_COLORS[user.persona] || PERSONA_COLORS.general}`}>{user.persona}</span>
+                  <span className="text-[10px] text-slate-500 capitalize">{(user.life_event || "activity").replace(/_/g, ' ')}</span>
+                </div>
+                <span className="text-xs font-bold text-blue-500">{user.confidence}%</span>
+              </div>
+              <p className="text-[10px] text-slate-400 italic">"{user.reason || 'No reasoning provided.'}"</p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

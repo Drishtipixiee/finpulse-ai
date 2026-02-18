@@ -1,56 +1,71 @@
 import { NextResponse } from 'next/server';
 
-// Interface to prevent TypeScript errors
-interface Action {
-  type: string;
-  message: string;
-  product: string | null;
-}
+const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:8000';
 
-const DTI_LIMIT = 0.45; // Banking safety threshold
+const PULSE_MAP: Record<string, string> = {
+  higher_education:  "Education Event",
+  frequent_traveler: "Travel Pattern",
+  renter:            "Rental Payment",
+  employed:          "Salary Detected",
+  unknown:           "Standard",
+};
+
+const ACTION_TYPE_MAP: Record<string, string> = {
+  student:          "PROACTIVE_OFFER",
+  spender:          "PROACTIVE_OFFER",
+  saver:            "PROACTIVE_OFFER",
+  credit_dependent: "SAFETY_ADVICE",
+  general:          "NEUTRAL",
+};
 
 export async function POST(req: Request) {
   try {
-    const { amount, description, monthlyIncome = 80000 } = await req.json();
+    const { user_id = "user_001", description = "" } = await req.json();
 
-    // 1. PULSE ENGINE: Pattern Recognition
-    const isEducation = description.toLowerCase().includes('university');
+    // ✅ Endpoint logic is INSIDE the function
+    const endpoint = description.trim()
+      ? `${FASTAPI_URL}/analyze-text`
+      : `${FASTAPI_URL}/analyze/${user_id}`;
 
-    // 2. GUARDRAIL ENGINE: Risk Assessment
-    const dtiRatio = amount / monthlyIncome;
-    const isSafe = dtiRatio < DTI_LIMIT;
+    const fastapiRes = await fetch(endpoint, {
+      method: description.trim() ? 'POST' : 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      ...(description.trim() && { body: JSON.stringify({ description }) })
+    });
 
-    // 3. CONTEXT ENGINE: Intelligent Decisioning
-    let action: Action = {
-      type: "NEUTRAL",
-      message: "Transaction analyzed successfully.",
-      product: null
-    };
-
-    if (isEducation) {
-      if (isSafe) {
-        action = {
-          type: "PROACTIVE_OFFER",
-          message: "University fee detected. We recommend our 0% Forex Student Card for your international studies.",
-          product: "Student Forex Card"
-        };
-      } else {
-        action = {
-          type: "SAFETY_ADVICE",
-          message: "Education payment detected. To maintain financial health, we suggest a Smart Savings SIP.",
-          product: "Education SIP Plan"
-        };
-      }
+    if (!fastapiRes.ok) {
+      throw new Error(`FastAPI error: ${fastapiRes.status}`);
     }
+
+    const data = await fastapiRes.json();
+    const dtiRatio = data.confidence / 100;
 
     return NextResponse.json({
       success: true,
-      pulse: isEducation ? "Education Event" : "Standard",
-      guardrail: { status: isSafe ? "PASS" : "ALERT", ratio: dtiRatio },
-      action
+      pulse:     PULSE_MAP[data.life_event] ?? "Standard",
+      guardrail: {
+        status: data.guardrail === "passed" ? "PASS" : "ALERT",
+        ratio:  dtiRatio,
+      },
+      action: {
+        type:    ACTION_TYPE_MAP[data.persona] ?? "NEUTRAL",
+        message: data.message,
+        product: data.product,
+      },
+      _meta: {
+        persona:        data.persona,
+        life_event:     data.life_event,
+        confidence:     data.confidence,
+        reason:         data.reason,
+        guardrail_note: data.guardrail_note,
+      }
     });
- } catch {
-    // Simply remove the (_error) entirely if you aren't using it
-    return NextResponse.json({ success: false, error: "System Latency" }, { status: 500 });
+
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { success: false, error: "System Latency" },
+      { status: 500 }
+    );
   }
 }

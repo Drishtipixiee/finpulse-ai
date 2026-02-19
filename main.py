@@ -28,7 +28,6 @@ app.add_middleware(
 def on_startup():
     create_tables()
 
-# ── Pydantic Models ───────────────────────────────────────
 class SignupRequest(BaseModel):
     employee_id: str
     name: str
@@ -40,10 +39,11 @@ class LoginRequest(BaseModel):
     employee_id: str
     password: str
 
+# ✅ Added customer_name field
 class TextAnalysisRequest(BaseModel):
     description: str
+    customer_name: str = "Anonymous Customer"
 
-# ── Auth Endpoints ────────────────────────────────────────
 @app.post("/auth/signup")
 def signup(req: SignupRequest, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.employee_id == req.employee_id).first()
@@ -85,16 +85,13 @@ def get_me(current_user: User = Depends(get_current_user)):
         "email": current_user.email
     }
 
-# ── Analysis Endpoints ────────────────────────────────────
 @app.get("/analyze/{user_id}")
 def analyze(user_id: str, db: Session = Depends(get_db)):
     logs = db.query(AuditLog).filter(
         AuditLog.customer_id == user_id
     ).order_by(AuditLog.timestamp.desc()).all()
-    
     if not logs:
         return []
-    
     return [
         {
             "user_id": log.customer_id,
@@ -120,11 +117,14 @@ def analyze_text(
         prompt = f"""Analyze this banking transaction: '{req.description}'. 
 Return JSON with these exact keys:
 - persona: one of (student, spender, saver, credit_dependent, general)
-- life_event: one of (higher_education, frequent_traveler, renter, employed, dining_out, shopping, unknown)
+- life_event: one of (higher_education, frequent_traveler, renter, employed, dining_out, entertainment, shopping, major_purchase, debt_management, auto_loan, unknown)
 - product: recommended banking product name
 - confidence: integer between 60 and 95
 - reason: one sentence explaining why
-- message: friendly 2 line personalized recommendation message"""
+- message: friendly 2 line personalized recommendation message
+- guardrail: "blocked" only if the customer shows signs of excessive debt, multiple loans, or the product offer would be predatory. Otherwise "passed".
+- guardrail_note: one sentence explaining the compliance decision
+- dti_ratio: higher (0.7-0.9) if customer has existing heavy debt burden, lower (0.1-0.4) for healthy financial situation"""
 
         chat = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
@@ -135,22 +135,91 @@ Return JSON with these exact keys:
 
         log = AuditLog(
             employee_id=current_user.employee_id,
-            customer_id=current_user.name,
+            # ✅ Now stores actual customer name, not analyst name
+            customer_id=req.customer_name,
             product_recommended=res.get("product", "N/A"),
             life_event=res.get("life_event", "activity"),
             persona=res.get("persona", "general"),
             confidence=res.get("confidence", 75),
             reason=res.get("reason", "Analysis logged."),
-            guardrail="passed"
+            guardrail=res.get("guardrail", "passed")
         )
         db.add(log)
         db.commit()
-        return {**res, "guardrail": "passed"}
+        return {**res, "guardrail": res.get("guardrail", "passed")}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ── Admin Endpoints ───────────────────────────────────────
+@app.post("/admin/seed-demo-data")
+def seed_demo_data(db: Session = Depends(get_db)):
+    demo_data = [
+        {
+            "employee_id": "EMP001",
+            "customer_id": "Arjun Mehta",
+            "product_recommended": "Travel Credit Card",
+            "life_event": "frequent_traveler",
+            "persona": "spender",
+            "confidence": 87,
+            "reason": "Customer has 29 international transactions in last 3 months including flights and hotels",
+            "guardrail": "passed"
+        },
+        {
+            "employee_id": "EMP001",
+            "customer_id": "Priya Sharma",
+            "product_recommended": "Education Loan",
+            "life_event": "higher_education",
+            "persona": "student",
+            "confidence": 92,
+            "reason": "Multiple tuition fee payments and university bookstore transactions detected",
+            "guardrail": "passed"
+        },
+        {
+            "employee_id": "EMP001",
+            "customer_id": "Rahul Verma",
+            "product_recommended": "Debt Consolidation Loan",
+            "life_event": "debt_management",
+            "persona": "credit_dependent",
+            "confidence": 78,
+            "reason": "Customer has 4 active EMI payments with DTI ratio exceeding safe threshold",
+            "guardrail": "blocked"
+        },
+        {
+            "employee_id": "EMP001",
+            "customer_id": "Sneha Patel",
+            "product_recommended": "Home Insurance",
+            "life_event": "renter",
+            "persona": "saver",
+            "confidence": 83,
+            "reason": "Regular monthly rent payments detected with consistent savings deposits",
+            "guardrail": "passed"
+        },
+        {
+            "employee_id": "EMP001",
+            "customer_id": "Vikram Nair",
+            "product_recommended": "Investment Portfolio",
+            "life_event": "employed",
+            "persona": "saver",
+            "confidence": 91,
+            "reason": "Stable salary credits with low expense ratio indicating investable surplus",
+            "guardrail": "passed"
+        },
+    ]
+    for d in demo_data:
+        log = AuditLog(
+            employee_id=d["employee_id"],
+            customer_id=d["customer_id"],
+            product_recommended=d["product_recommended"],
+            life_event=d["life_event"],
+            persona=d["persona"],
+            confidence=d["confidence"],
+            reason=d["reason"],
+            guardrail=d["guardrail"]
+        )
+        db.add(log)
+    db.commit()
+    return {"status": "success", "message": "Demo data seeded with 5 realistic customers"}
+
 @app.get("/admin/all-users")
 def all_users(db: Session = Depends(get_db)):
     logs = db.query(AuditLog).order_by(AuditLog.timestamp.desc()).all()
@@ -225,6 +294,13 @@ def audit_log(
             "timestamp": l.timestamp
         } for l in logs
     ]}
+
+@app.post("/auth/logout")
+def logout(current_user: User = Depends(get_current_user)):
+    return {
+        "status": "success",
+        "message": f"Session ended for {current_user.name}"
+    }
 
 @app.get("/")
 def root():

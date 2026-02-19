@@ -218,7 +218,6 @@ Vercel
 
 Security is integrated at every layer.
 
-JWT authentication
 Secure API access
 Compliance guardrail validation
 Audit logging system
@@ -263,7 +262,7 @@ Mokshda Jain
 Recommendation Engine, Intelligence Logic
 
 Mrinmayee Lokhande
-Research, Validation, Use Case Design
+Research, Validation.
 
 ---
 

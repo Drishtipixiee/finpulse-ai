@@ -248,20 +248,3 @@ Category: Intelligent Banking Systems
 > “FinPulse demonstrates how autonomous intelligence can transform banking from reactive systems into proactive financial ecosystems.”
 
 ---
-
-# Hackathon Submission
-
-InnovGenius 2026 — Final Round Submission  
-
-Team Project: FinPulse AI  
-Category: Intelligent Banking Systems  
-
-> “We built FinPulse to demonstrate how autonomous intelligence can transform modern banking from reactive operations into proactive financial ecosystems.”
-
----
-
-# Hackathon Submission
-
-InnovGenius 2026 Final Round Submission  
-
-FinPulse AI — Agentic Cross-Sell Intelligence Engine

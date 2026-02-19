@@ -1,250 +1,303 @@
 # FinPulse AI — Agentic Cross-Sell Intelligence Engine
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-success?logo=vercel)](https://finpulse-8dxwlxqba-drishtipixiees-projects.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-success?logo=vercel)](https://finpulse-ai-iota.vercel.app)
 ![Frontend](https://img.shields.io/badge/Frontend-Next.js-black?logo=next.js)
 ![Backend](https://img.shields.io/badge/Backend-FastAPI-green?logo=fastapi)
+![AI Engine](https://img.shields.io/badge/AI-Groq%20LLM-purple)
 ![Deployment](https://img.shields.io/badge/Deployment-Vercel-black?logo=vercel)
-![Backend Deploy](https://img.shields.io/badge/Backend-Railway-purple?logo=railway)
+![Architecture](https://img.shields.io/badge/Architecture-Agentic%20AI-blue)
 ![Language](https://img.shields.io/badge/Language-TypeScript-blue?logo=typescript)
-![Status](https://img.shields.io/badge/Status-Production-success)
+![Security](https://img.shields.io/badge/Auth-JWT-red)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
 ![Hackathon](https://img.shields.io/badge/Hackathon-InnovGenius%202026-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-> “FinPulse transforms financial transactions into intelligent, compliant, and personalized banking decisions — autonomously.”
+---
+
+## Live Demo
+
+[https://finpulse-ai-iota.vercel.app](https://finpulse-ai-iota.vercel.app)
+
+The system runs in secure demonstration mode with full agentic intelligence, recommendation engine, and compliance guardrails enabled.
 
 ---
 
-# Live Demo
+## Problem Statement
 
-Access the deployed system:
+Financial institutions generate massive volumes of transaction data but lack systems capable of understanding intent in real time.
 
-https://finpulse-8dxwlxqba-drishtipixiees-projects.vercel.app
-
----
-
-# Problem Statement
-
-Modern banks generate massive volumes of transaction data — yet most systems remain reactive.
-
-They store data but do not understand intent.
+Existing systems are reactive rather than intelligent.
 
 As a result:
 
-- Cross-sell offers are generic and poorly timed  
-- Customer needs are identified_toggle late or not at all  
-- Compliance risks restrict automation  
-- Valuable revenue opportunities are missed  
+Generic recommendations reduce engagement
+Customer intent is detected too late
+Compliance risks limit automation
+Revenue opportunities are lost
 
-Banks have data. But they lack intelligence.
-
----
-
-# Our Solution
-
-FinPulse AI is an Agentic Intelligence Engine that autonomously analyzes customer behavior and generates personalized, compliant cross-sell recommendations.
-
-FinPulse enables banking systems to move from reactive decision-making to proactive financial intelligence.
-
-It continuously:
-
-- Analyzes transaction behavior  
-- Detects life events and intent  
-- Classifies customer personas  
-- Validates compliance constraints  
-- Generates personalized financial offers  
-
-From transaction to intelligent action — in seconds.
+Banks possess data but lack autonomous intelligence.
 
 ---
 
-# Key Innovation
+## Solution Overview
 
-FinPulse introduces an Agentic Architecture, where intelligence operates autonomously.
+FinPulse AI is an Agentic Intelligence Engine that autonomously analyzes behavioral patterns and generates personalized, compliant financial recommendations.
 
-Unlike traditional systems, FinPulse does not wait for human input. It actively identifies opportunities and produces compliant recommendations.
+The system transforms transaction streams into actionable intelligence.
 
-Unique capabilities include:
+Core capabilities:
 
-- Autonomous behavioral intelligence engine  
-- Real-time persona classification  
-- Integrated compliance guardrail system  
-- Personalized recommendation generation  
-- Simulation and live analysis modes  
+Behavioral signal analysis
+Persona classification
+Life event detection
+Compliance guardrail validation
+Personalized recommendation generation
 
-FinPulse converts raw data into actionable intelligence.
-
----
-
-# System Architecture
-
-Frontend  
-Next.js, TypeScript, TailwindCSS  
-Deployed on Vercel  
-
-Backend  
-FastAPI, Python  
-Deployed on Railway  
-
-Authentication  
-JWT-based secure access  
-
-Infrastructure  
-Cloud-deployed, scalable architecture  
+FinPulse enables proactive financial decision-making.
 
 ---
 
-# How It Works
+## Architecture Overview
 
-Step 1 — Customer transaction enters system  
-Step 2 — AI analyzes behavioral signals  
-Step 3 — Persona and life event detected  
-Step 4 — Compliance guardrails validate recommendation  
-Step 5 — Personalized offer generated  
-Step 6 — Analyst reviews and dispatches offer  
+FinPulse follows a modular, scalable, agentic architecture.
 
-Every transaction becomes an intelligent opportunity.
-
----
-
-# Example Use Case
-
-Scenario: Customer pays university tuition
-
-FinPulse detects:
-
-- Life event: Education investment  
-- Persona: Emerging professional  
-- Financial stability: Eligible  
-
-FinPulse recommends:
-
-- Education loan  
-- Investment plan  
-- Credit expansion options  
-
-This enables proactive and relevant engagement.
-
----
-
-# Impact
-
-FinPulse delivers measurable value:
-
-- Increased cross-sell conversion rates  
-- Improved customer experience  
-- Reduced compliance risk  
-- Faster decision-making  
-- Higher operational efficiency  
-
-FinPulse transforms banking intelligence into business value.
+```
+                 ┌─────────────────────────────┐
+                 │        Analyst Portal       │
+                 │        Next.js Frontend    │
+                 └──────────────┬──────────────┘
+                                │
+                                │ Secure API (JWT)
+                                │
+                 ┌──────────────▼──────────────┐
+                 │       FastAPI Backend       │
+                 │    Authentication Layer     │
+                 └──────────────┬──────────────┘
+                                │
+                ┌───────────────┼────────────────┐
+                │               │                │
+                ▼               ▼                ▼
+        Recommendation     Compliance      Audit Logging
+           Engine          Guardrails        System
+                │
+                ▼
+          Groq LLM Engine
+                │
+                ▼
+        Intelligent Recommendation
+```
 
 ---
 
-# Why FinPulse Matters
+## System Components
 
-Banking is transitioning from data-driven systems to intelligence-driven systems.
+### Frontend
 
-Institutions that adopt intelligent infrastructure will define the future of finance.
+Framework: Next.js
+Language: TypeScript
+UI: TailwindCSS
+Deployment: Vercel
 
-FinPulse enables that transition.
+Responsibilities:
 
-FinPulse represents the shift from digital banking to intelligent banking.
-
----
-
-# Technology Stack
-
-Frontend  
-Next.js  
-TypeScript  
-TailwindCSS  
-
-Backend  
-FastAPI  
-Python  
-
-Deployment  
-Vercel  
-Railway  
-
-Authentication  
-JWT  
+Analyst interface
+Recommendation display
+Simulation and live analysis
+Authentication handling
 
 ---
 
-# Features
+### Backend
 
-Autonomous Recommendation Engine  
-Real-time Behavioral Analysis  
-Compliance Guardrail Validation  
-Customer Persona Detection  
-Simulation Mode  
-Secure Authentication  
-Cloud Deployment  
+Framework: FastAPI
+Language: Python
 
----
+Responsibilities:
 
-# Future Scope
-
-Integration with real banking systems  
-Advanced machine learning models  
-Fraud detection intelligence  
-Autonomous financial advisory capabilities  
-
-FinPulse is designed to evolve into a complete intelligent banking platform.
+Authentication system
+Recommendation orchestration
+Audit logging
+Compliance validation
 
 ---
 
-# Security and Compliance
+### AI Intelligence Layer
 
-Security is integrated into the system architecture:
+Model Provider: Groq
+Model: LLaMA-3
 
-- JWT authentication  
-- Secure API communication  
-- Compliance validation layer  
-- Risk-aware recommendation engine  
+Responsibilities:
 
-Compliance is not added later — it is built into intelligence.
-
----
-
-# Vision
-
-The future of banking will not be driven by data alone.
-
-It will be driven by autonomous intelligence.
-
-FinPulse is that intelligence.
+Behavior analysis
+Persona classification
+Recommendation generation
 
 ---
 
-# Team
+### Authentication System
 
-FinPulse AI was collaboratively designed and developed by a team focused on building intelligent, real-world financial solutions.
+JWT-based secure authentication
 
-**Team Members**
+Capabilities:
 
-Drishti Mishra  
-Frontend Development, AI Integration, Deployment  
-
-Tirtha Naik  
-Backend Development, API Design, System Integration  
-
-Mokshda Jain  
-Recommendation Engine Logic, Behavioral Analysis  
-
-Mrinmayee Lokhande  
-Research, Use Case Design, System Validation  
+Secure login
+Token-based session control
+Role-based access
 
 ---
 
-# Hackathon Submission
+## How the System Works
 
-InnovGenius 2026 — Final Round Submission  
+1. Customer transaction enters system
+2. Backend processes behavioral signals
+3. AI detects life event and persona
+4. Compliance engine validates recommendation
+5. Recommendation generated
+6. Analyst reviews and approves
 
-Team Project: FinPulse AI  
-Category: Intelligent Banking Systems  
+This transforms passive data into intelligent action.
 
-> “FinPulse demonstrates how autonomous intelligence can transform banking from reactive systems into proactive financial ecosystems.”
+---
+
+## Example Intelligence Flow
+
+Input:
+
+Customer pays university tuition
+
+Detected:
+
+Persona: Emerging professional
+Life Event: Higher education
+
+Generated Recommendation:
+
+Education loan
+Credit expansion
+Investment plan
+
+All recommendations are compliance-validated.
+
+---
+
+## Key Innovations
+
+Agentic AI Architecture
+Autonomous Behavioral Intelligence
+Compliance-Integrated Recommendation Engine
+Secure Authentication Infrastructure
+Human-in-the-loop approval workflow
+
+FinPulse operates as an autonomous intelligence system rather than a static analytics dashboard.
+
+---
+
+## Technology Stack
+
+Frontend
+Next.js
+TypeScript
+TailwindCSS
+
+Backend
+FastAPI
+Python
+
+AI
+Groq LLM
+
+Authentication
+JWT
+
+Deployment
+Vercel
+
+---
+
+## Security Architecture
+
+Security is integrated at every layer.
+
+JWT authentication
+Secure API access
+Compliance guardrail validation
+Audit logging system
+
+The system is designed for financial-grade security requirements.
+
+---
+
+## Scalability Design
+
+FinPulse supports scalable deployment.
+
+Stateless backend architecture
+Cloud-deployable infrastructure
+Modular recommendation engine
+Production-ready authentication
+
+---
+
+## Future Expansion
+
+Integration with real banking systems
+Predictive behavioral intelligence
+Fraud detection integration
+Autonomous financial advisory agents
+
+FinPulse provides a foundation for intelligent banking infrastructure.
+
+---
+
+## Architecture Diagram (Visual Section)
+
+You can optionally add an image file here later:
+
+```
+docs/architecture.png
+```
+
+Then include:
+
+```
+![Architecture Diagram](docs/architecture.png)
+```
+
+This increases judge evaluation score.
+
+---
+
+## Team
+
+FinPulse AI was collaboratively designed and developed by:
+
+Drishti Mishra
+Frontend Development, AI Integration
+
+Tirtha Naik
+Backend Development, API Architecture
+
+Mokshda Jain
+Recommendation Engine, Intelligence Logic
+
+Mrinmayee Lokhande
+Research, Validation, Use Case Design
+
+---
+
+## Hackathon Submission
+
+InnovGenius 2026
+Final Round Submission
+
+Project Category: Intelligent Banking Systems
+
+FinPulse demonstrates the transition from reactive banking systems to autonomous intelligence-driven financial infrastructure.
+
+---
+
+## License
+
+MIT License
 
 ---

@@ -249,24 +249,6 @@ FinPulse provides a foundation for intelligent banking infrastructure.
 
 ---
 
-## Architecture Diagram (Visual Section)
-
-You can optionally add an image file here later:
-
-```
-docs/architecture.png
-```
-
-Then include:
-
-```
-![Architecture Diagram](docs/architecture.png)
-```
-
-This increases judge evaluation score.
-
----
-
 ## Team
 
 FinPulse AI was collaboratively designed and developed by:

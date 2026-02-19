@@ -43,7 +43,7 @@ export default function DashboardPage() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:8000/admin/distinct-users', {
+      const res = await fetch(`${FASTAPI_URL}/admin/distinct-users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -82,7 +82,7 @@ export default function DashboardPage() {
           headers: { 'Authorization': `Bearer ${token}` }
         });
       } else {
-        response = await fetch('http://localhost:8000/analyze-text', {
+        response = await fetch(`${FASTAPI_URL}/analyze-text`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

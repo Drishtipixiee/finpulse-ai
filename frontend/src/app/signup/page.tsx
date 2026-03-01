@@ -29,11 +29,15 @@ export default function SignupPage() {
       const response = await axios.post(`${API_URL}/auth/signup`, formData);
 
       if (response.data.status === 'success') {
+        const empId = response.data.employee_id;
+        // Explicitly show the user their new ID so they know how to log in
+        window.alert(`🎉 Account created successfully!\n\nIMPORTANT: Your login Employee ID is: ${empId}\n\nPlease write this down or copy it to log in.`);
+
         // Redirect to login page after successful registration
         router.push('/');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed. Try a different Employee ID.');
+      setError(err.response?.data?.detail || 'Registration failed.');
     } finally {
       setLoading(false);
     }

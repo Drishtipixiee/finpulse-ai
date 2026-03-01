@@ -13,6 +13,9 @@ from groq import Groq
 import jwt
 import os
 import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # ========================
 # LOAD ENV
@@ -144,6 +147,14 @@ class TextAnalysisRequest(BaseModel):
 
     description: str
     customer_name: str = "Anonymous Customer"
+
+
+class EmailDispatchRequest(BaseModel):
+    
+    customer_email: str
+    customer_name: str
+    offer_message: str
+    product_name: str
 
 
 # ========================
@@ -286,6 +297,69 @@ def analyze_text(
     db.commit()
 
     return res
+
+
+@app.post("/dispatch-email")
+def dispatch_email(
+    req: EmailDispatchRequest,
+    current_user: User = Depends(get_current_user)
+):
+    
+    sender_email = os.getenv("SMTP_EMAIL")
+    sender_password = os.getenv("SMTP_PASSWORD")
+
+    if not sender_email or not sender_password:
+        print(f"⚠️ Simulation Mode: Would have sent email to {req.customer_email}")
+        print(f"Offer: {req.offer_message}")
+        return {
+            "status": "success",
+            "message": "Email dispatched in SIMULATION mode (no SMTP credentials found)."
+        }
+
+    try:
+        # Create HTML email
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"A Personalized Offer from FinPulse Bank"
+        msg["From"] = f"FinPulse Advisor <{sender_email}>"
+        msg["To"] = req.customer_email
+
+        html = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px;">
+            <div style="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-600">
+                <h2 style="color: #1e3a8a;">Hello {req.customer_name},</h2>
+                <p style="color: #475569; line-height: 1.6;">
+                    {req.offer_message}
+                </p>
+                <div style="margin-top: 30px; text-align: left;">
+                    <a href="https://finpulse-ai-iota.vercel.app/" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                        Explore {req.product_name}
+                    </a>
+                </div>
+                <hr style="margin-top: 40px; border: none; border-top: 1px solid #e2e8f0;" />
+                <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">
+                    This is an AI-generated personalized offer sent by your FinPulse Advisor.
+                </p>
+            </div>
+          </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(html, "html"))
+
+        # Send via Gmail SMTP
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, req.customer_email, msg.as_string())
+
+        return {
+            "status": "success",
+            "message": f"Email successfully dispatched to {req.customer_email}"
+        }
+        
+    except Exception as e:
+        print(f"❌ Email Dispatch Failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ========================

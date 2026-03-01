@@ -308,7 +308,33 @@ export default function DashboardPage() {
 
               <button
                 type="button"
-                onClick={() => setNotifSent(true)}
+                onClick={async () => {
+                  setNotifSent(true);
+                  try {
+                    const token = localStorage.getItem('finpulse_access');
+                    const emailMap: Record<string, string> = {
+                      "Nia": "d@gmail.com",
+                      "Raj Kumar": "drishtimishrahere@gmail.com"
+                    };
+                    const recipientEmail = emailMap[customerName.trim()] || "drishtimishrahere@gmail.com";
+
+                    await fetch(`${FASTAPI_URL}/dispatch-email`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        customer_email: recipientEmail,
+                        customer_name: customerName.trim() || "Customer",
+                        offer_message: analysis.action.message,
+                        product_name: analysis.action.product
+                      })
+                    });
+                  } catch (err) {
+                    console.error("Failed to dispatch email", err);
+                  }
+                }}
                 disabled={notifSent}
                 className={`w-full py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${notifSent
                   ? 'bg-green-500/20 border border-green-500/30 text-green-400'
@@ -322,7 +348,7 @@ export default function DashboardPage() {
               </button>
               {notifSent && (
                 <p className="text-[10px] text-green-400 text-center mt-2">
-                  Delivered via push notification, SMS & in-app banner
+                  Delivered via Email, push notification & in-app banner
                 </p>
               )}
             </div>

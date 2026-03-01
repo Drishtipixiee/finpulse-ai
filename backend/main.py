@@ -272,31 +272,35 @@ def analyze_text(
     current_user: User = Depends(get_current_user)
 ):
 
-    prompt = f"Analyze banking transaction: {req.description}"
+    try:
+        prompt = f"Analyze banking transaction: {req.description}"
 
-    chat = client.chat.completions.create(
-        messages=[{"role": "user", "content": prompt}],
-        model="llama-3.3-70b-versatile",
-        response_format={"type": "json_object"}
-    )
+        chat = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            response_format={"type": "json_object"}
+        )
 
-    res = json.loads(chat.choices[0].message.content)
+        res = json.loads(chat.choices[0].message.content)
 
-    log = AuditLog(
-        employee_id=current_user.employee_id,
-        customer_id=req.customer_name,
-        product_recommended=res.get("product", ""),
-        life_event=res.get("life_event", ""),
-        persona=res.get("persona", ""),
-        confidence=res.get("confidence", 80),
-        reason=res.get("reason", ""),
-        guardrail=res.get("guardrail", "passed")
-    )
+        log = AuditLog(
+            employee_id=current_user.employee_id,
+            customer_id=req.customer_name,
+            product_recommended=res.get("product", ""),
+            life_event=res.get("life_event", ""),
+            persona=res.get("persona", ""),
+            confidence=res.get("confidence", 80),
+            reason=res.get("reason", ""),
+            guardrail=res.get("guardrail", "passed")
+        )
 
-    db.add(log)
-    db.commit()
+        db.add(log)
+        db.commit()
 
-    return res
+        return res
+    except Exception as e:
+        print(f"Analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/dispatch-email")

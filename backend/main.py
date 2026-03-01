@@ -40,6 +40,7 @@ app.add_middleware(
         "https://finpulse-ai-iota.vercel.app",
         "https://finpulse-61v8909w3-drishtipixiees-projects.vercel.app",
         "https://finpulse-oebxquml7-drishtipixiees-projects.vercel.app",
+        "https://finpulse-ai-gt99.vercel.app",
     ],
     allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
@@ -333,3 +334,11 @@ def health():
         "status": "healthy",
         "service": "FinPulse AI"
     }
+
+@app.get("/db-test")
+def db_test(db: Session = Depends(get_db)):
+    try:
+        count = db.query(User).count()
+        return {"status": "success", "user_count": count}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}

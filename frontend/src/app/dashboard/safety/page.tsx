@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { ShieldCheck, Lock, Eye, AlertCircle, Scale, Activity } from 'lucide-react';
 
-const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 export default function SafetyPage() {
   const [stats, setStats] = useState({
     total_analyses: 0,

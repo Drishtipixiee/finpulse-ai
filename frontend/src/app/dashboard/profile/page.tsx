@@ -20,7 +20,7 @@ interface UserListItem {
   name: string;
 }
 
-const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 const PERSONA_COLORS: Record<string, string> = {
   student: 'text-blue-400 bg-blue-400/10 border-blue-400/30',

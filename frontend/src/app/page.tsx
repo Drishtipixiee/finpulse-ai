@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -20,7 +22,7 @@ export default function LoginPage() {
 
     try {
       // Points to your local FastAPI backend
-      const response = await axios.post('http://127.0.0.1:8000/auth/login', {
+      const response = await axios.post(`${API_URL}/auth/login`, {
         employee_id: employeeId,
         password: password,
       });

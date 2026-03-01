@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { ShieldAlert, ShieldCheck, AlertTriangle } from 'lucide-react';
 
-const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 const PERSONA_COLORS: Record<string, string> = {
   student: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
   spender: 'text-orange-400 bg-orange-400/10 border-orange-400/30',

@@ -39,30 +39,30 @@ export default function DashboardPage() {
   const [notifSent, setNotifSent] = useState(false);
 
   useEffect(() => {
-  const fetchCustomers = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    try {
-      const res = await fetch(`${FASTAPI_URL}/admin/distinct-users`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      console.log('RAW API RESPONSE:', data); // ← ADD THIS
-      if (data.distinct_users?.length > 0) {
-        const mapped = data.distinct_users.map((u: any) => ({
-          id: u.user_id,
-          name: u.name
-        }));
-        console.log('MAPPED CUSTOMERS:', mapped); // ← ADD THIS
-        setCustomers(mapped);
-        setSelectedCustomer(mapped[0]);
+    const fetchCustomers = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await fetch(`${FASTAPI_URL}/admin/distinct-users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        console.log('RAW API RESPONSE:', data); // ← ADD THIS
+        if (data.distinct_users?.length > 0) {
+          const mapped = data.distinct_users.map((u: any) => ({
+            id: u.user_id,
+            name: u.name
+          }));
+          console.log('MAPPED CUSTOMERS:', mapped); // ← ADD THIS
+          setCustomers(mapped);
+          setSelectedCustomer(mapped[0]);
+        }
+      } catch (e) {
+        console.error('FETCH ERROR:', e);
       }
-    } catch (e) {
-      console.error('FETCH ERROR:', e);
-    }
-  };
-  fetchCustomers();
-}, []);
+    };
+    fetchCustomers();
+  }, []);
 
   const triggerAgent = async () => {
     if (mode === 'simulation' && !description.trim()) return;
@@ -77,7 +77,7 @@ export default function DashboardPage() {
       let response;
 
       if (mode === 'auto') {
-        response = await fetch(`http://localhost:8000/analyze/${selectedCustomer!.id}`, {
+        response = await fetch(`${FASTAPI_URL}/analyze/${selectedCustomer!.id}`, {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -134,10 +134,10 @@ export default function DashboardPage() {
 
       setAnalysis(formattedData);
       setLogs([
-        `PULSE_INBOUND: Life event detected → "${result.life_event}"`,
+        `PULSE_INBOUND: Life event detected \u2192 "${result.life_event}"`,
         `PERSONA_ENGINE: User classified as "${result.persona}"`,
         `REASON: ${result.reason}`,
-        `COMPLIANCE_CHECK: Guardrail ${result.guardrail} — ${result.guardrail_note ?? "Compliant."}`,
+        `COMPLIANCE_CHECK: Guardrail ${result.guardrail} \u2014 ${result.guardrail_note ?? "Compliant."}`,
         `CONFIDENCE_SCORE: ${result.confidence}%`,
         `GEN_AI: Personalized offer generated for "${result.product}"`,
       ]);
@@ -179,22 +179,20 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => { setMode('auto'); setAnalysis(null); setLogs([]); setNotifSent(false); }}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                  mode === 'auto'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${mode === 'auto'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  }`}
               >
                 Auto Analysis
               </button>
               <button
                 type="button"
                 onClick={() => { setMode('simulation'); setAnalysis(null); setLogs([]); setNotifSent(false); }}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                  mode === 'simulation'
-                    ? 'bg-yellow-600 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${mode === 'simulation'
+                  ? 'bg-yellow-600 text-white'
+                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  }`}
               >
                 Simulation Mode
               </button>
@@ -226,17 +224,15 @@ export default function DashboardPage() {
                             e.stopPropagation();
                             setSelectedCustomer({ id: c.id, name: c.name });
                           }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
-                            selectedCustomer?.id === c.id
-                              ? 'border-blue-500 bg-blue-500/10'
-                              : 'border-slate-800 bg-slate-900/50 hover:border-slate-600'
-                          }`}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${selectedCustomer?.id === c.id
+                            ? 'border-blue-500 bg-blue-500/10'
+                            : 'border-slate-800 bg-slate-900/50 hover:border-slate-600'
+                            }`}
                         >
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                            selectedCustomer?.id === c.id
-                              ? 'bg-blue-500/20'
-                              : 'bg-slate-800'
-                          }`}>
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${selectedCustomer?.id === c.id
+                            ? 'bg-blue-500/20'
+                            : 'bg-slate-800'
+                            }`}>
                             <User size={14} className={selectedCustomer?.id === c.id ? 'text-blue-400' : 'text-slate-500'} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -314,11 +310,10 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => setNotifSent(true)}
                 disabled={notifSent}
-                className={`w-full py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                  notifSent
-                    ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                    : 'bg-green-600 hover:bg-green-500 text-white'
-                }`}
+                className={`w-full py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${notifSent
+                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                  : 'bg-green-600 hover:bg-green-500 text-white'
+                  }`}
               >
                 {notifSent
                   ? <><CheckCircle size={14} /> Offer Dispatched to Customer</>

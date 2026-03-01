@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server';
 
-const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:8000';
+const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 const PULSE_MAP: Record<string, string> = {
-  higher_education:  "Education Event",
+  higher_education: "Education Event",
   frequent_traveler: "Travel Pattern",
-  renter:            "Rental Payment",
-  employed:          "Salary Detected",
-  unknown:           "Standard",
+  renter: "Rental Payment",
+  employed: "Salary Detected",
+  unknown: "Standard",
 };
 
 const ACTION_TYPE_MAP: Record<string, string> = {
-  student:          "PROACTIVE_OFFER",
-  spender:          "PROACTIVE_OFFER",
-  saver:            "PROACTIVE_OFFER",
+  student: "PROACTIVE_OFFER",
+  spender: "PROACTIVE_OFFER",
+  saver: "PROACTIVE_OFFER",
   credit_dependent: "SAFETY_ADVICE",
-  general:          "NEUTRAL",
+  general: "NEUTRAL",
 };
 
 export async function POST(req: Request) {
@@ -42,21 +42,21 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      pulse:     PULSE_MAP[data.life_event] ?? "Standard",
+      pulse: PULSE_MAP[data.life_event] ?? "Standard",
       guardrail: {
         status: data.guardrail === "passed" ? "PASS" : "ALERT",
-        ratio:  dtiRatio,
+        ratio: dtiRatio,
       },
       action: {
-        type:    ACTION_TYPE_MAP[data.persona] ?? "NEUTRAL",
+        type: ACTION_TYPE_MAP[data.persona] ?? "NEUTRAL",
         message: data.message,
         product: data.product,
       },
       _meta: {
-        persona:        data.persona,
-        life_event:     data.life_event,
-        confidence:     data.confidence,
-        reason:         data.reason,
+        persona: data.persona,
+        life_event: data.life_event,
+        confidence: data.confidence,
+        reason: data.reason,
         guardrail_note: data.guardrail_note,
       }
     });

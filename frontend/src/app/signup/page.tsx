@@ -17,6 +17,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -24,7 +26,7 @@ export default function SignupPage() {
 
     try {
       // Connects to your FastAPI signup endpoint
-      const response = await axios.post('http://127.0.0.1:8000/auth/signup', formData);
+      const response = await axios.post(`${API_URL}/auth/signup`, formData);
 
       if (response.data.status === 'success') {
         // Redirect to login page after successful registration
@@ -40,7 +42,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-[#050914] flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8">
-        
+
         {/* Header */}
         <div className="flex items-center justify-center bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md">
           <div className="p-2 bg-blue-500/20 rounded-full animate-pulse">
@@ -57,8 +59,8 @@ export default function SignupPage() {
         </div>
 
         {/* Signup Form */}
-        <form 
-          onSubmit={handleSignup} 
+        <form
+          onSubmit={handleSignup}
           className="bg-[#0d1425] border border-slate-800 rounded-3xl p-8 space-y-4 relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -74,7 +76,7 @@ export default function SignupPage() {
               type="text"
               placeholder="Full Name"
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full bg-[#050914] border border-white/10 rounded-xl p-3.5 text-white focus:border-blue-500 transition-all outline-none"
               required
             />
@@ -82,7 +84,7 @@ export default function SignupPage() {
               type="text"
               placeholder="Employee ID (e.g., alex505)"
               value={formData.employee_id}
-              onChange={(e) => setFormData({...formData, employee_id: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
               className="w-full bg-[#050914] border border-white/10 rounded-xl p-3.5 text-white focus:border-blue-500 transition-all outline-none"
               required
             />
@@ -90,7 +92,7 @@ export default function SignupPage() {
               type="email"
               placeholder="Email Address"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full bg-[#050914] border border-white/10 rounded-xl p-3.5 text-white focus:border-blue-500 transition-all outline-none"
               required
             />
@@ -98,7 +100,7 @@ export default function SignupPage() {
               type="password"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full bg-[#050914] border border-white/10 rounded-xl p-3.5 text-white focus:border-blue-500 transition-all outline-none"
               required
             />

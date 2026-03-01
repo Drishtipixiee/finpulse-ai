@@ -7,7 +7,6 @@ import Link from 'next/link';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    employee_id: '',
     name: '',
     email: '',
     password: '',
@@ -81,14 +80,6 @@ export default function SignupPage() {
               placeholder="Full Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full bg-[#050914] border border-white/10 rounded-xl p-3.5 text-white focus:border-blue-500 transition-all outline-none"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Employee ID (e.g., alex505)"
-              value={formData.employee_id}
-              onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
               className="w-full bg-[#050914] border border-white/10 rounded-xl p-3.5 text-white focus:border-blue-500 transition-all outline-none"
               required
             />
